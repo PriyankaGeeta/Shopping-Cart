@@ -13,10 +13,10 @@ import {
 } from "react-bootstrap";
 
 const products = [
-  { name: "Apples:", country: "Italy", cost: 3, instock: 10, image: "images/01.png"},
-  { name: "Oranges:", country: "Spain", cost: 4, instock: 3, image: "images/02.png" },
-  { name: "Beans:", country: "USA", cost: 2, instock: 5, image: "images/03.png"},
-  { name: "Cabbage:", country: "USA", cost: 1, instock: 8, image: "images/04.png"},
+  { name: "Apples", country: "Italy", cost: 3, instock: 10, image: "images/01.png"},
+  { name: "Oranges", country: "Spain", cost: 4, instock: 4, image: "images/02.png" },
+  { name: "Beans", country: "USA", cost: 2, instock: 5, image: "images/03.png"},
+  { name: "Cabbage", country: "USA", cost: 1, instock: 8, image: "images/04.png"},
 ];
 
 const useDataApi = (initialUrl, initialData) => {
@@ -172,12 +172,27 @@ const Products = (props) => {
     return newTotal;
   };
   const restockProducts = (url) => {
-    doFetch(url);
-    let newItems = data.map((item) => {
-      let { name, country, cost, instock } = item;
-      return { name, country, cost, instock };
-    });
-    setItems([...items, ...newItems]);
+      
+    var requestOptions = {
+        method: 'GET',
+        redirect: 'follow'
+      };
+  
+      fetch(url, requestOptions)
+          .then(response => response.json())
+          .then(result => {
+            result.forEach((element) => {
+              // let restockItem = items.find((e) => e.name === element.name)
+              const newRestockItem = items.map((item) => {
+                if(item.name === element.name) {
+                  item.instock += element.instock
+                }
+                return item
+              })
+              setItems(newRestockItem)
+            })
+          })
+          .catch(error => console.log('error', error));
   };
 
   return (
@@ -200,7 +215,7 @@ const Products = (props) => {
       <Row>
         <form
           onSubmit={(event) => {
-            restockProducts(`http://localhost:1337/${query}`);
+            restockProducts(`${query}`);
             console.log(`Restock called on ${query}`);
             event.preventDefault();
           }}
